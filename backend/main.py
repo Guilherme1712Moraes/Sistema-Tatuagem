@@ -1,8 +1,10 @@
-from fastapi import FastAPI  # importa o FastAPI
+from fastapi import FastAPI
+from rotas import clientes
 
-app = FastAPI()              # cria a aplicação
+app = FastAPI()
 
+app.include_router(clientes.router)
 
-@app.get("/")                # define que essa função responde ao endereço "/"
-def inicio():                # quando alguém acessar "/", essa função vai rodar
+@app.get("/")
+def inicio():
     return {"mensagem": "API do estúdio de tatuagem funcionando!"}
