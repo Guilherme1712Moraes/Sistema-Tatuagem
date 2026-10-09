@@ -24,7 +24,15 @@ def listar_tatuadores():
     try:
         cursor.execute("SELECT * FROM tatuador")
         tatuadores = cursor.fetchall()
+        
+        # Converte datas para string para evitar erro de validação no Pydantic
+        for t in tatuadores:
+            if t.get("datacontratacao") is not None:
+                t["datacontratacao"] = str(t["datacontratacao"])
+                
         return tatuadores
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
         db.close()
@@ -50,7 +58,7 @@ def criar_tatuador(tatuador: TatuadorSchema):
         cursor.execute(query, valores)
         db.commit()
         novo_id = cursor.lastrowid
-        return {**tatuador.dict(), "idtatuador": novo_id}
+        return {**tatuador.model_dump(), "idtatuador": novo_id}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
@@ -69,6 +77,9 @@ def deletar_tatuador(id: int):
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Tatuador não encontrado")
         return {"mensagem": "Tatuador removido com sucesso!"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
         db.close()
