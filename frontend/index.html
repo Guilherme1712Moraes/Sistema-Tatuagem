@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Clientes - Estúdio Tatuagem</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Gestão de Clientes</h1>
+        
+        <!-- Formulário de Cadastro -->
+        <form id="form-cliente">
+            <input type="hidden" id="cliente-id">
+            <input type="text" id="nome" placeholder="Nome Completo" required>
+            <input type="text" id="cpf" placeholder="CPF" required>
+            <input type="text" id="telefone" placeholder="Telefone">
+            <input type="date" id="datacadastro">
+            <input type="text" id="cidade" placeholder="Cidade">
+            <input type="text" id="uf" placeholder="UF" maxlength="2">
+            <button type="submit" id="btn-salvar">Salvar Cliente</button>
+        </form>
+
+        <!-- Tabela de Clientes -->
+        <h2>Lista de Clientes</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Telefone</th>
+                    <th>Cidade/UF</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-clientes">
+                <!-- Os clientes serão inseridos aqui via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
