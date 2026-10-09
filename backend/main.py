@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from rotas import clientes
+from rotas import clientes, tatuadores
 
 app = FastAPI()
 
-# Permitir requisições do Frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,6 +13,7 @@ app.add_middleware(
 )
 
 app.include_router(clientes.router)
+app.include_router(tatuadores.router)
 
 @app.get("/")
 def inicio():
