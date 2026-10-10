@@ -1,15 +1,22 @@
 # ============================================================
-# rotas/agendamentos.py — CRUD de Agendamentos
+# rotas/agendamentos.py — CRUD de Agendamentos com Upload de Imagem
 # ============================================================
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, File, UploadFile, Form
 from pydantic import BaseModel
 from typing import Optional
+import shutil
+import os
+import uuid
 from database import conectar
 
 router = APIRouter(prefix="/agendamentos", tags=["Agendamentos"])
 
-# Modelo Pydantic para validação das requisições
+# Diretório para guardar os ficheiros de imagem
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# Modelo Pydantic para validação das requisições JSON normais
 class Agendamento(BaseModel):
     idcliente: int
     idtatuador: int
@@ -19,20 +26,38 @@ class Agendamento(BaseModel):
     valortatuagem: Optional[float] = None
     status: Optional[str] = None
 
-# 1. Cadastrar Agendamento (POST)
+# 1. Cadastrar Agendamento com Imagem (POST)
 @router.post("/")
-def criar_agendamento(agendamento: Agendamento):
+async def criar_agendamento(
+    idcliente: int = Form(...),
+    idtatuador: int = Form(...),
+    dataagendamento: str = Form(...),
+    horaagendamento: str = Form(...),
+    descricaotatuagem: Optional[str] = Form(None),
+    valortatuagem: Optional[float] = Form(None),
+    status: Optional[str] = Form(None),
+    desenho: Optional[UploadFile] = File(None)
+):
+    nome_ficheiro = None
+    if desenho:
+        # Gera um nome único para evitar conflitos de nomes iguais
+        extensao = os.path.splitext(desenho.filename)[1]
+        nome_ficheiro = f"{uuid.uuid4()}{extensao}"
+        caminho_destino = os.path.join(UPLOAD_DIR, nome_ficheiro)
+        
+        with open(caminho_destino, "wb") as buffer:
+            shutil.copyfileobj(desenho.file, buffer)
+
     conn = conectar()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            """INSERT INTO agendamento (idcliente, idtatuador, dataagendamento, horaagendamento, descricaotatuagem, valortatuagem)
-               VALUES (%s, %s, %s, %s, %s, %s)""",
-            (agendamento.idcliente, agendamento.idtatuador, agendamento.dataagendamento,
-             agendamento.horaagendamento, agendamento.descricaotatuagem, agendamento.valortatuagem)
+            """INSERT INTO agendamento (idcliente, idtatuador, dataagendamento, horaagendamento, descricaotatuagem, valortatuagem, status, desenhoaprovado)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+            (idcliente, idtatuador, dataagendamento, horaagendamento, descricaotatuagem, valortatuagem, status, nome_ficheiro)
         )
         conn.commit()
-        return {"mensagem": "Agendamento cadastrado com sucesso"}
+        return {"mensagem": "Agendamento cadastrado com sucesso", "desenhoaprovado": nome_ficheiro}
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
