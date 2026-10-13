@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles  # 1. Importar o StaticFiles
-from rotas import clientes, tatuadores, agendamentos
+from rotas import clientes, senioridade, tatuadores, agendamentos, estilos
 
 app = FastAPI()
 
+# Configuração de CORS obrigatória para o Frontend (porta 5500) falar com o Backend (porta 8000)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,9 +13,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 2. Servir a pasta uploads de forma pública
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
 app.include_router(clientes.router)
+app.include_router(senioridade.router)
+app.include_router(estilos.router)
 app.include_router(tatuadores.router)
 app.include_router(agendamentos.router)

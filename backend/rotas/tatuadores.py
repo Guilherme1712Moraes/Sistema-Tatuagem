@@ -1,85 +1,101 @@
-from fastapi import APIRouter, HTTPException
+# ============================================================
+# rotas/tatuadores.py — CRUD de Tatuadores com N:N de Estilos
+# ============================================================
+
+from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Optional, List
 from database import conectar
 
-router = APIRouter(prefix="/tatuadores", tags=["Tatuadores"])
+router = APIRouter()
 
-class TatuadorSchema(BaseModel):
-    nometatuador: str
-    cpf: Optional[str] = None
-    email: Optional[str] = None
-    telefone: Optional[str] = None
-    datacontratacao: Optional[str] = None
-    idsenioridade: Optional[int] = 1
+class Tatuador(BaseModel):
+    nome: str
+    idsenioridade: int
+    estilos: list[int] = []  # Lista de IDs dos estilos selecionados
 
-class TatuadorResponse(TatuadorSchema):
-    idtatuador: int
-
-# 1. Listar Tatuadores
-@router.get("/", response_model=List[TatuadorResponse])
+# GET /tatuadores — Lista todos os tatuadores com os respetivos estilos
+@router.get("/tatuadores")
 def listar_tatuadores():
-    db = conectar()
-    cursor = db.cursor(dictionary=True)
-    try:
-        cursor.execute("SELECT * FROM tatuador")
-        tatuadores = cursor.fetchall()
-        
-        # Converte datas para string para evitar erro de validação no Pydantic
-        for t in tatuadores:
-            if t.get("datacontratacao") is not None:
-                t["datacontratacao"] = str(t["datacontratacao"])
-                
-        return tatuadores
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        cursor.close()
-        db.close()
+    conn = conectar()
+    cursor = conn.cursor(dictionary=True)
+    
+    # Mapeia nometatuador como 'nome' para o frontend ler corretamente
+    cursor.execute("""
+        SELECT t.idtatuador, t.nometatuador as nome, t.idsenioridade, s.nome as senioridade_nome 
+        FROM tatuador t
+        JOIN senioridade s ON t.idsenioridade = s.idsenioridade
+    """)
+    tatuadores = cursor.fetchall()
 
-# 2. Criar Tatuador
-@router.post("/", response_model=TatuadorResponse)
-def criar_tatuador(tatuador: TatuadorSchema):
-    db = conectar()
-    cursor = db.cursor()
-    try:
-        query = """
-            INSERT INTO tatuador (nometatuador, cpf, email, telefone, datacontratacao, idsenioridade)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        valores = (
-            tatuador.nometatuador,
-            tatuador.cpf,
-            tatuador.email,
-            tatuador.telefone,
-            tatuador.datacontratacao,
-            tatuador.idsenioridade
+    for tat in tatuadores:
+        cursor.execute("""
+            SELECT e.idestilo, e.descricao 
+            FROM estilo e
+            JOIN tatuador_estilo te ON e.idestilo = te.idestilo
+            WHERE te.idtatuador = %s
+        """, (tat["idtatuador"],))
+        tat["estilos"] = cursor.fetchall()
+
+    conn.close()
+    return tatuadores
+
+# POST /tatuadores — Cadastra novo tatuador e associa os estilos
+@router.post("/tatuadores")
+def criar_tatuador(tatuador: Tatuador):
+    conn = conectar()
+    cursor = conn.cursor()
+    
+    cursor.execute(
+        "INSERT INTO tatuador (nometatuador, idsenioridade) VALUES (%s, %s)",
+        (tatuador.nome, tatuador.idsenioridade)
+    )
+    idtatuador = cursor.lastrowid
+
+    for id_estilo in tatuador.estilos:
+        cursor.execute(
+            "INSERT INTO tatuador_estilo (idtatuador, idestilo) VALUES (%s, %s)",
+            (idtatuador, id_estilo)
         )
-        cursor.execute(query, valores)
-        db.commit()
-        novo_id = cursor.lastrowid
-        return {**tatuador.model_dump(), "idtatuador": novo_id}
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        cursor.close()
-        db.close()
 
-# 3. Deletar Tatuador
-@router.delete("/{id}")
+    conn.commit()
+    conn.close()
+    return {"mensagem": "Tatuador cadastrado com sucesso", "idtatuador": idtatuador}
+
+# PUT /tatuadores/{id} — Atualiza tatuador e seus estilos
+@router.put("/tatuadores/{id}")
+def atualizar_tatuador(id: int, tatuador: Tatuador):
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE tatuador SET nometatuador = %s, idsenioridade = %s WHERE idtatuador = %s",
+        (tatuador.nome, tatuador.idsenioridade, id)
+    )
+
+    cursor.execute("DELETE FROM tatuador_estilo WHERE idtatuador = %s", (id,))
+
+    for id_estilo in tatuador.estilos:
+        cursor.execute(
+            "INSERT INTO tatuador_estilo (idtatuador, idestilo) VALUES (%s, %s)",
+            (id, id_estilo)
+        )
+
+    conn.commit()
+    conn.close()
+    return {"mensagem": "Tatuador atualizado com sucesso"}
+
+# DELETE /tatuadores/{id} — Deleta um tatuador
+@router.delete("/tatuadores/{id}")
 def deletar_tatuador(id: int):
-    db = conectar()
-    cursor = db.cursor()
+    conn = conectar()
+    cursor = conn.cursor()
     try:
+        cursor.execute("DELETE FROM tatuador_estilo WHERE idtatuador = %s", (id,))
         cursor.execute("DELETE FROM tatuador WHERE idtatuador = %s", (id,))
-        db.commit()
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Tatuador não encontrado")
-        return {"mensagem": "Tatuador removido com sucesso!"}
+        conn.commit()
+        conn.close()
+        return {"mensagem": "Tatuador deletado com sucesso"}
     except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        cursor.close()
-        db.close()
+        conn.rollback()
+        conn.close()
+        return {"erro": f"Não foi possível excluir o tatuador: {str(e)}"}
