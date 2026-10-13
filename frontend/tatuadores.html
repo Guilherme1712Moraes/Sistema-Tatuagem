@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Tatuadores — Estúdio de Tatuagem</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container py-4">
+
+  <nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container">
+      <span class="navbar-brand">Estúdio de Tatuagem</span>
+      <div>
+        <a href="clientes.html" class="text-light me-3">Clientes</a>
+        <a href="senioridade.html" class="text-light me-3">Senioridade</a>
+        <a href="estilos.html" class="text-light me-3">Estilos</a>
+        <a href="tatuadores.html" class="text-light me-3">Tatuadores</a>
+        <a href="agendamentos.html" class="text-light">Agendamentos</a>
+      </div>
+    </div>
+  </nav>
+
+  <h1>Tatuadores</h1>
+
+  <form id="form-tatuador" class="card p-3 mb-4">
+    <div class="mb-3">
+      <label for="nome" class="form-label">Nome do Tatuador</label>
+      <input type="text" id="nome" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="idsenioridade" class="form-label">Senioridade</label>
+      <select id="idsenioridade" class="form-control" required>
+        <option value="">Selecione a senioridade...</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Estilos de Especialidade (N:N)</label>
+      <div id="lista-estilos-checkbox" class="border p-2 rounded">
+        <!-- Checkboxes de estilos gerados via JS -->
+      </div>
+    </div>
+
+    <button id="btn-submit-tatuador" type="submit" class="btn btn-primary">Cadastrar</button>
+  </form>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Senioridade</th>
+        <th>Estilos</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="corpo-tabela">
+    </tbody>
+  </table>
+
+  <script src="js/tatuadores.js"></script>
+</body>
+</html>
