@@ -18,3 +18,6 @@ app.include_router(senioridade.router)
 app.include_router(estilos.router)
 app.include_router(tatuadores.router)
 app.include_router(agendamentos.router)
+from rotas import clientes, senioridade, tatuadores, agendamentos, estilos, usuarios 
+
+app.include_router(usuarios.router, prefix="/usuarios", tags=["Usuários"])
