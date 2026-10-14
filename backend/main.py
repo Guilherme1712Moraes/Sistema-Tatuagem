@@ -4,7 +4,7 @@
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from seguranca import verificar_token
+from seguranca import verificar_token, verificar_admin
 from rotas import login, usuarios, clientes, tatuadores, agendamentos, estilos, senioridade
 
 app = FastAPI(title="Estúdio de Tatuagem API", version="0.1.0")
@@ -18,9 +18,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Inclusão das rotas (Login e Usuários ficam livres, as outras exigem token)
+# Inclusão das rotas (Login fica livre, usuários exige admin, as outras exigem token)
 app.include_router(login.router, tags=["Login"])
-app.include_router(usuarios.router, prefix="/usuarios", tags=["Usuários"])
+app.include_router(usuarios.router, prefix="/usuarios", tags=["Usuários"], dependencies=[Depends(verificar_admin)])
 app.include_router(clientes.router, prefix="/clientes", tags=["Clientes"], dependencies=[Depends(verificar_token)])
 app.include_router(senioridade.router, prefix="/senioridade", tags=["Senioridade"], dependencies=[Depends(verificar_token)])
 app.include_router(estilos.router, prefix="/estilos", tags=["Estilos"], dependencies=[Depends(verificar_token)])
