@@ -1,10 +1,12 @@
 const API = 'http://127.0.0.1:8000'
+protegerPagina() // Bloqueia a página se não houver token de autenticação
+
 const formTatuador = document.getElementById('form-tatuador')
 const botaoSubmit = document.getElementById('btn-submit-tatuador')
 
 async function carregarSelects() {
   // Carrega Senioridades
-  const resSen = await fetch(`${API}/senioridade`)
+  const resSen = await fetchAutenticado(`${API}/senioridade`)
   const senioridades = await resSen.json()
   const selectSen = document.getElementById('idsenioridade')
   selectSen.innerHTML = '<option value="">Selecione a senioridade...</option>'
@@ -13,7 +15,7 @@ async function carregarSelects() {
   })
 
   // Carrega Estilos em Checkboxes
-  const resEst = await fetch(`${API}/estilos`)
+  const resEst = await fetchAutenticado(`${API}/estilos`)
   const estilos = await resEst.json()
   const divEstilos = document.getElementById('lista-estilos-checkbox')
   divEstilos.innerHTML = ''
@@ -29,7 +31,7 @@ async function carregarSelects() {
 }
 
 async function listarTatuadores() {
-  const resposta = await fetch(`${API}/tatuadores`)
+  const resposta = await fetchAutenticado(`${API}/tatuadores`)
   const tatuadores = await resposta.json()
 
   const corpo = document.getElementById('corpo-tabela')
@@ -68,13 +70,13 @@ formTatuador.addEventListener('submit', async (e) => {
   const idTatuador = formTatuador.dataset.idTatuador
 
   if (idTatuador) {
-    await fetch(`${API}/tatuadores/${idTatuador}`, {
+    await fetchAutenticado(`${API}/tatuadores/${idTatuador}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(tatuador)
     })
   } else {
-    await fetch(`${API}/tatuadores`, {
+    await fetchAutenticado(`${API}/tatuadores`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(tatuador)
@@ -111,6 +113,6 @@ function preencherEdicao(tatuador) {
 
 async function deletarTatuador(id) {
   if (!confirm('Tem certeza que deseja excluir este tatuador?')) return
-  await fetch(`${API}/tatuadores/${id}`, { method: 'DELETE' })
+  await fetchAutenticado(`${API}/tatuadores/${id}`, { method: 'DELETE' })
   listarTatuadores()
 }

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from database import conectar
 import bcrypt
 
-router = APIRouter(prefix="/usuarios", tags=["Usuários"])
+router = APIRouter(tags=["Usuários"])
 
 class UsuarioSchema(BaseModel):
     nome: str

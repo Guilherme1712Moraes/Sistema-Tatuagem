@@ -1,10 +1,12 @@
 const API = 'http://127.0.0.1:8000'
+protegerPagina() // Bloqueia a página se não houver token de autenticação
+
 const formAgendamento = document.getElementById('form-agendamento')
 
 async function carregarSelects() {
   try {
     // Carregar Clientes para o select
-    const resClientes = await fetch(`${API}/clientes`)
+    const resClientes = await fetchAutenticado(`${API}/clientes`)
     const clientes = await resClientes.json()
     const selectCliente = document.getElementById('cliente_id')
     selectCliente.innerHTML = '<option value="">Selecione um cliente...</option>'
@@ -13,7 +15,7 @@ async function carregarSelects() {
     })
 
     // Carregar Tatuadores para o select
-    const resTatuadores = await fetch(`${API}/tatuadores`)
+    const resTatuadores = await fetchAutenticado(`${API}/tatuadores`)
     const tatuadores = await resTatuadores.json()
     const selectTatuador = document.getElementById('tatuador_id')
     selectTatuador.innerHTML = '<option value="">Selecione um tatuador...</option>'
@@ -27,7 +29,7 @@ async function carregarSelects() {
 
 async function listarAgendamentos() {
   try {
-    const resposta = await fetch(`${API}/agendamentos`)
+    const resposta = await fetchAutenticado(`${API}/agendamentos`)
     const agendamentos = await resposta.json()
 
     const corpo = document.getElementById('corpo-tabela')
@@ -81,7 +83,7 @@ formAgendamento.addEventListener('submit', async (e) => {
   }
 
   try {
-    const resposta = await fetch(`${API}/agendamentos`, {
+    const resposta = await fetchAutenticado(`${API}/agendamentos`, {
       method: 'POST',
       body: formData
     })
@@ -103,7 +105,7 @@ async function deletarAgendamento(id) {
   if (!confirm('Tens a certeza que pretendes excluir este agendamento?')) return
 
   try {
-    const resposta = await fetch(`${API}/agendamentos/${id}`, { method: 'DELETE' })
+    const resposta = await fetchAutenticado(`${API}/agendamentos/${id}`, { method: 'DELETE' })
     if (resposta.ok) {
       listarAgendamentos()
     } else {

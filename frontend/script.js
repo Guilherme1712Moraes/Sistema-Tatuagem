@@ -1,10 +1,11 @@
 const API_URL = "http://127.0.0.1:8000/clientes";
+protegerPagina() // Bloqueia a página se não houver token de autenticação
 
 document.addEventListener("DOMContentLoaded", carregarClientes);
 
 // Listar Clientes
 async function carregarClientes() {
-    const res = await fetch(API_URL);
+    const res = await fetchAutenticado(API_URL);
     const clientes = await res.json();
     
     const tabela = document.getElementById("tabela-clientes");
@@ -39,7 +40,7 @@ document.getElementById("form-cliente").addEventListener("submit", async (e) => 
         uf: document.getElementById("uf").value
     };
 
-    await fetch(API_URL, {
+    await fetchAutenticado(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(clienteData)
@@ -52,7 +53,7 @@ document.getElementById("form-cliente").addEventListener("submit", async (e) => 
 // Deletar Cliente
 async function deletarCliente(id) {
     if (confirm("Tem certeza que deseja excluir?")) {
-        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        await fetchAutenticado(`${API_URL}/${id}`, { method: "DELETE" });
         carregarClientes();
     }
 }
