@@ -1,45 +1,36 @@
 # ============================================================
-# rotas/usuarios.py — Cadastro de Usuários
-# Descrição: Endpoint para cadastrar novos usuários do sistema,
-#            guardando a senha como hash (nunca em texto puro).
+# rotas/usuarios.py — Gestão e Registo de Utilizadores
 # ============================================================
 
 from fastapi import APIRouter
 from pydantic import BaseModel
 from database import conectar
-import bcrypt      # biblioteca que gera e confere o hash da senha
+import bcrypt
 
-router = APIRouter()
+router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
-# Modelo de dados — define os campos que o usuário deve ter
-class Usuario(BaseModel):
-    nome: str     # obrigatório
-    email: str    # obrigatório
-    senha: str    # obrigatório — chega aqui em texto puro, só nessa etapa
+class UsuarioSchema(BaseModel):
+    nome: str
+    email: str
+    senha: str
+    tipo: str = "funcional"
 
-# POST /usuarios — cadastra um novo usuário
-@router.post("")
-def criar_usuario(usuario: Usuario):
-    # gera o hash da senha — gensalt() cria um "tempero" aleatório (salt) diferente
-    # a cada vez, então duas pessoas com a mesma senha geram hashes diferentes
-    senha_hash = bcrypt.hashpw(usuario.senha.encode("utf-8"), bcrypt.gensalt())
-    # .encode("utf-8") transforma o texto da senha em bytes, porque é isso que o bcrypt espera
-
+@router.post("/")
+def criar_usuario(usuario: UsuarioSchema):
     conn = conectar()
     cursor = conn.cursor()
 
+    # Encriptar a senha com bcrypt
+    hashed_senha = bcrypt.hashpw(usuario.senha.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
     try:
         cursor.execute(
-            "INSERT INTO usuario (nome, email, senha) VALUES (%s, %s, %s)",
-            (usuario.nome, usuario.email, senha_hash.decode("utf-8"))
-            # .decode("utf-8") faz o caminho inverso: de bytes pra texto, porque a
-            # coluna do banco (VARCHAR) guarda texto, não bytes
+            "INSERT INTO usuario (nome, email, senha, tipo) VALUES (%s, %s, %s, %s)",
+            (usuario.nome, usuario.email, hashed_senha, usuario.tipo)
         )
         conn.commit()
+        return {"mensagem": "Utilizador criado com sucesso!"}
+    except Exception as e:
+        return {"erro": str(e)}
+    finally:
         conn.close()
-        return {"mensagem": "Usuário cadastrado com sucesso"}
-        # repare que a resposta NUNCA inclui a senha nem o hash
-    except Exception as erro:
-        conn.rollback()
-        conn.close()
-        return {"erro": "Não foi possível cadastrar. Verifique se esse e-mail já está em uso."}
