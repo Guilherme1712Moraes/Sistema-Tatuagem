@@ -1,32 +1,34 @@
-const API = 'http://127.0.0.1:8000'
-const formCadastro = document.getElementById('form-cadastro')
+const API = "http://127.0.0.1:8000";
 
-formCadastro.addEventListener('submit', async (e) => {
-  e.preventDefault()
+// Bloqueia a página se não tiver login ativo
+protegerPagina();
 
-  const dados = {
-    nome: document.getElementById('nome').value,
-    email: document.getElementById('email').value,
-    senha: document.getElementById('senha').value
-  }
+document.getElementById("formCadastro").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  try {
-    const resposta = await fetch(`${API}/usuarios/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dados)
-    })
+    const nome = document.getElementById("nome").value;
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
 
-    const resultado = await resposta.json()
+    try {
+        const resposta = await fetchAutenticado(`${API}/usuarios/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ nome, email, senha, tipo: "funcional" })
+        });
 
-    if (resposta.ok) {
-      alert('Conta criada com sucesso! Podes fazer login.')
-      window.location.href = 'login.html'
-    } else {
-      alert('Erro ao cadastrar: ' + (resultado.detail || JSON.stringify(resultado)))
+        const dados = await resposta.json();
+
+        if (resposta.ok) {
+            alert("Funcionário criado com sucesso!");
+            window.location.href = "dashboard.html";
+        } else {
+            alert("Erro: " + (dados.detail || dados.erro || "Não foi possível criar o utilizador"));
+        }
+    } catch (error) {
+        console.error("Erro na requisição:", error);
+        alert("Erro de conexão com o servidor.");
     }
-  } catch (erro) {
-    console.error('Erro de rede:', erro)
-    alert('Erro de conexão com o servidor.')
-  }
-})
+});

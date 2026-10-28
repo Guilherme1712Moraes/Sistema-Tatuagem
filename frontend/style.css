@@ -1,68 +1,271 @@
+/* =========================================================
+   SISTEMA ESTÚDIO DE TATUAGEM — DESIGN MODERNO (Catppuccin/Dark)
+   ========================================================= */
+
+/* Importação da fonte moderna Inter do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-main: #181825;
+  --bg-card: #1e1e2e;
+  --bg-input: #313244;
+  --bg-hover: #45475a;
+  --accent-blue: #89b4fa;
+  --accent-green: #a6e3a1;
+  --accent-teal: #94e2d5;
+  --accent-red: #f38ba8;
+  --accent-purple: #cba6f7;
+  --text-primary: #cdd6f4;
+  --text-muted: #a6adc8;
+  --border-color: #313244;
+  --border-highlight: #45475a;
+}
+
+/* Base Geral */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #1e1e2e;
-    color: #cdd6f4;
-    padding: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  min-height: 100vh;
+  margin: 0;
+  padding-bottom: 40px;
 }
 
+/* Links em geral */
+a {
+  text-decoration: none;
+}
+
+/* Container Principal com visual limpo */
 .container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: #181825;
-    padding: 20px;
-    border-radius: 8px;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-h1, h2 {
-    color: #89b4fa;
+/* Card Genérico / Painéis Internos */
+.card-custom, .container-box {
+  background: var(--bg-card);
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  margin-bottom: 24px;
 }
 
+/* Cabeçalhos e Títulos */
+h1, h2, h3, h4, h5, h6 {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+h1 {
+  color: var(--accent-blue);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.lead {
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   Barra de Navegação (Navbar)
+   ========================================================= */
+.navbar {
+  background-color: var(--bg-card) !important;
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-brand::before {
+  content: '⚡';
+  color: var(--accent-blue);
+}
+
+/* =========================================================
+   Formulários e Entradas
+   ========================================================= */
 form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  background-color: var(--bg-card);
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 24px;
 }
 
-input, button {
-    padding: 10px;
-    border-radius: 4px;
-    border: 1px solid #45475a;
-    background-color: #313244;
-    color: #fff;
+/* Responsividade do Form no celular */
+@media (max-width: 768px) {
+  form {
+    grid-template-columns: 1fr;
+  }
+  form button {
+    grid-column: span 1 !important;
+  }
 }
 
-button {
-    grid-column: span 2;
-    background-color: #a6e3a1;
-    color: #11111b;
-    font-weight: bold;
-    cursor: pointer;
+input, select, textarea, .form-control {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-input);
+  color: #fff;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
-button:hover {
-    background-color: #94e2d5;
+input:focus, select:focus, textarea:focus, .form-control:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(137, 180, 250, 0.15);
+  background-color: var(--bg-input);
+  color: #fff;
+}
+
+input::placeholder {
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   Botões
+   ========================================================= */
+button, .btn {
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 12px 20px;
+  transition: all 0.2s ease-in-out;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Botão principal do formulário */
+form button, .btn-success {
+  grid-column: span 2;
+  background-color: var(--accent-green);
+  color: #11111b;
+}
+
+form button:hover, .btn-success:hover {
+  background-color: var(--accent-teal);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(166, 227, 161, 0.25);
+}
+
+/* Sobrescrevendo os botões padrão do Bootstrap */
+.btn-primary {
+  background-color: #313244;
+  border: 1px solid var(--border-highlight);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #11111b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(137, 180, 250, 0.25);
+}
+
+.btn-secondary {
+  background-color: #181825;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-input);
+  color: #fff;
+  border-color: var(--border-highlight);
+  transform: translateY(-2px);
+}
+
+.btn-outline-light {
+  border-color: var(--border-highlight);
+  color: var(--text-primary);
+}
+
+.btn-outline-light:hover {
+  background-color: var(--accent-red);
+  border-color: var(--accent-red);
+  color: #fff;
+}
+
+/* Botão Deletar / Excluir */
+.btn-delete, .btn-danger {
+  background-color: rgba(243, 139, 168, 0.15);
+  color: var(--accent-red);
+  border: 1px solid rgba(243, 139, 168, 0.3);
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
+
+.btn-delete:hover, .btn-danger:hover {
+  background-color: var(--accent-red);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   Tabelas
+   ========================================================= */
+.table-responsive {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  margin-top: 20px;
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0;
 }
 
 th, td {
-    border: 1px solid #45475a;
-    padding: 10px;
-    text-align: left;
+  padding: 14px 18px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
 }
 
 th {
-    background-color: #313244;
+  background-color: #252536;
+  color: var(--accent-blue);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+  border-bottom: 2px solid var(--border-color);
 }
 
-.btn-delete {
-    background-color: #f38ba8;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
+tr {
+  transition: background-color 0.15s;
+}
+
+tbody tr:hover {
+  background-color: rgba(69, 71, 90, 0.4);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
 }

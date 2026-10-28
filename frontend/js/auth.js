@@ -2,36 +2,139 @@
 // js/auth.js — Funções compartilhadas de autenticação
 // ============================================================
 
-// Bloqueia a página se não tiver um token guardado
+
+// ============================================================
+// VERIFICAR SE EXISTE TOKEN
+// ============================================================
+
 function protegerPagina() {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    window.location.href = 'login.html'
-  }
+
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+
+        console.warn(
+            'Nenhum token encontrado. Redirecionando para login...'
+        );
+
+        window.location.href = 'login.html';
+
+        return false;
+    }
+
+    return true;
 }
 
-// Faz um fetch normal, mas já anexando o token no cabeçalho
+
+// ============================================================
+// FETCH AUTENTICADO
+// ============================================================
+
 async function fetchAutenticado(url, opcoes = {}) {
-  const token = localStorage.getItem('token')
 
-  opcoes.headers = {
-    ...opcoes.headers,
-    'Authorization': `Bearer ${token}`
-  }
+    const token = localStorage.getItem('token');
 
-  const resposta = await fetch(url, opcoes)
+    // Se não houver token, volta para o login
+    if (!token) {
 
-  if (resposta.status === 401) {
-    // Token expirado ou inválido — manda de volta pro login
-    localStorage.removeItem('token')
-    window.location.href = 'login.html'
-  }
+        console.warn(
+            'Token não encontrado.'
+        );
 
-  return resposta
+        window.location.href = 'login.html';
+
+        throw new Error('Usuário não autenticado.');
+    }
+
+
+    // ========================================================
+    // CONFIGURAR HEADERS
+    // ========================================================
+
+    opcoes.headers = {
+        ...(opcoes.headers || {}),
+        'Authorization': `Bearer ${token}`
+    };
+
+
+    try {
+
+        console.log(
+            'Requisição autenticada:',
+            url
+        );
+
+
+        const resposta = await fetch(
+            url,
+            opcoes
+        );
+
+
+        console.log(
+            `Resposta ${resposta.status}:`,
+            url
+        );
+
+
+        // ====================================================
+        // TOKEN INVÁLIDO OU EXPIRADO
+        // ====================================================
+
+        if (resposta.status === 401) {
+
+            console.warn(
+                'Token inválido ou expirado.'
+            );
+
+            localStorage.removeItem('token');
+
+            window.location.href =
+                'login.html';
+
+            throw new Error(
+                'Sessão expirada. Faça login novamente.'
+            );
+        }
+
+
+        // ====================================================
+        // ACESSO NEGADO
+        // ====================================================
+
+        if (resposta.status === 403) {
+
+            console.error(
+                'Acesso negado para:',
+                url
+            );
+        }
+
+
+        return resposta;
+
+
+    } catch (erro) {
+
+        console.error(
+            'Erro na requisição:',
+            url,
+            erro
+        );
+
+        throw erro;
+    }
 }
 
-// Desloga: apaga o token e volta pra tela de login
+
+// ============================================================
+// LOGOUT
+// ============================================================
+
 function sair() {
-  localStorage.removeItem('token')
-  window.location.href = 'login.html'
+
+    localStorage.removeItem('token');
+
+    window.location.href =
+        'login.html';
 }
